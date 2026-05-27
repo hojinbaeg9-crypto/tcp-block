@@ -119,26 +119,6 @@ int get_mac_address(const char* if_name, uint8_t* mac_out) {
 	return 0;
 }
 
-int get_ip_address(const char* if_name, uint32_t* ip_out) {
-	struct ifreq ifr;
-	int fd = socket(AF_INET, SOCK_DGRAM, 0);
-	if (fd < 0) return -1;
-
-	strncpy(ifr.ifr_name, if_name, IFNAMSIZ - 1);
-	if (ioctl(fd, SIOCGIFADDR, &ifr) < 0) {
-		close(fd);
-		return -1;
-	}
-
-	// 이미 네트워크 바이트 순서로 받아옴
-	uint32_t ip = ((struct sockaddr_in*)&ifr.ifr_addr)->sin_addr.s_addr;
-	// 우리 로직(Host Order 저장 후 htonl 호출)에 맞추기 위해 ntohl 적용
-	*ip_out = ntohl(ip);
-
-	close(fd);
-	return 0;
-}
-
 uint16_t checksum(uint16_t* buf, int len) {
     uint32_t sum = 0;
     while (len > 1) {
